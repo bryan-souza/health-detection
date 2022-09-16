@@ -1,7 +1,10 @@
 import os
 import shutil
+import numpy as np
+
 from pycocotools.coco import COCO
 from pathlib import Path
+from PIL import Image
 
 
 EXTRAS_PATH = Path('.', 'extra')
@@ -42,5 +45,16 @@ def create_dataset_structure():
 
             shutil.copyfile(src=image_path, dst=Path(ROOT_DIR, 'unhealthy', image_name))
 
-if __name__ == '__main__':
-    create_dataset_structure()
+def standardize_background(source: Path, target: Path):
+    for img in source.iterdir():
+        im = Image.open(img)
+
+        data = np.array(im)   # "data" is a height x width x 4 numpy array
+        red, green, blue = data.T # Temporarily unpack the bands for readability
+
+        # Replace white with black...
+        white_areas = (red >= 225) & (blue >= 225) & (green >= 225)    
+        data[white_areas.T] = (0, 0, 0) # Transpose back needed
+
+        im_conv = Image.fromarray(data)
+        im_conv.save(Path(target, img.name))
