@@ -1,4 +1,4 @@
 env/
 extra/
-**/**/_pycache__/
+**/**/__pycache__/
 **/**/*.zip
