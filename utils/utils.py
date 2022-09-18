@@ -1,10 +1,12 @@
 import os
 import shutil
+from typing import Tuple
 import numpy as np
 
 from pycocotools.coco import COCO
 from pathlib import Path
 from PIL import Image
+from PIL.Image import Resampling
 
 
 class ImgToolbox():
@@ -55,6 +57,32 @@ class ImgToolbox():
 
                 shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'unhealthy', image_name))    
 
+
+    @staticmethod
+    def resize_image(source: str, target: str, target_size=Tuple[int, int]):
+        # Type enforcing
+        source_path = Path(source)
+        if not source_path.exists():
+            raise ValueError('%s does not exist on filesystem' % source)
+        
+        target_path = Path(target)
+        if not target_path.exists():
+            raise ValueError('%s does not exist on filesystem' % target)
+
+        if not isinstance(target_size, tuple):
+            raise TypeError('parameter "target_size" must be a tuple')
+
+        if not len(target_size) == 2:
+            raise ValueError('parameter "target_size" has length of %i, should be 2' % len(target_size))
+
+        if not all([ isinstance(size, int) for size in target_size ]):
+            raise ValueError('parameter "target_size" contents must be integers')
+
+        
+        for img in source_path.iterdir():
+            im = Image.open(img)
+            im.thumbnail(target_size, Resampling.LANCZOS)
+            im.save(Path(target_path, img.name))
 
     @staticmethod
     def standardize_background(source: str, target: str):
