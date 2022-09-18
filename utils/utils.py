@@ -7,54 +7,64 @@ from pathlib import Path
 from PIL import Image
 
 
-EXTRAS_PATH = Path('.', 'extra')
-HEALTHY_CATEGORIES = [1, 8]
+class ImgToolbox():
+    ROOT_PATH = Path('..')
+    DATASET_PATH = Path(ROOT_PATH, 'dataset')
+    EXTRAS_PATH = Path(ROOT_PATH, 'extra')
 
-def create_dataset_structure():
-    instances_path = Path(EXTRAS_PATH, 'instances_default.json')
-    if not instances_path.exists():
-        raise FileNotFoundError('%s could not be found' % 'extra/instances_default.json')
+    HEALTHY_CATEGORIES = [1, 8]
 
-    # Load annotations
-    dataset = COCO(instances_path)
+    def __init__(self):
+        pass
 
-    # Create file structure
-    class_names = ['healthy', 'unhealthy']
-    ROOT_DIR = Path('.', 'dataset')
+    def create_dataset_structure(self):
+        instances_path = Path(self.EXTRAS_PATH, 'instances_default.json')
+        if not instances_path.exists():
+            raise FileNotFoundError('"extra/instances_default.json" could not be found')
 
-    if not ROOT_DIR.exists():
-        os.mkdir( ROOT_DIR.absolute() )
+        # Load annotations
+        dataset = COCO(instances_path)
 
-    for _class in class_names:
-        CLASS_PATH = Path(ROOT_DIR, _class)
-        if not CLASS_PATH.exists():
-            os.mkdir( CLASS_PATH.absolute() )
+        # Create file structure
+        class_names = ['healthy', 'unhealthy']
+        
+        # Create dataset root folder if not exists
+        if not self.DATASET_PATH.exists():
+            os.mkdir( self.DATASET_PATH.absolute() )
 
-    # Move files to folders
-    for category_id in dataset.getCatIds():
-        image_ids = dataset.catToImgs[category_id]
-        images = dataset.loadImgs(image_ids)
+        for _class in class_names:
+            CLASS_PATH = Path(self.DATASET_PATH, _class)
 
-        for image in images:
-            image_path = Path(EXTRAS_PATH, image['file_name'])
-            image_name = image_path.name
+            # Create feature folders if not exists
+            if not CLASS_PATH.exists():
+                os.mkdir( CLASS_PATH.absolute() )
 
-            if category_id in HEALTHY_CATEGORIES:
-                shutil.copyfile(src=image_path, dst=Path(ROOT_DIR, 'healthy', image_name))
-                continue
+        # Move files to folders
+        for category_id in dataset.getCatIds():
+            image_ids = dataset.catToImgs[category_id]
+            images = dataset.loadImgs(image_ids)
 
-            shutil.copyfile(src=image_path, dst=Path(ROOT_DIR, 'unhealthy', image_name))
+            for image in images:
+                image_path = Path(self.EXTRAS_PATH, image['file_name'])
+                image_name = image_path.name
 
-def standardize_background(source: Path, target: Path):
-    for img in source.iterdir():
-        im = Image.open(img)
+                if category_id in self.HEALTHY_CATEGORIES:
+                    shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'healthy', image_name))
+                    continue
 
-        data = np.array(im)   # "data" is a height x width x 4 numpy array
-        red, green, blue = data.T # Temporarily unpack the bands for readability
+                shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'unhealthy', image_name))
 
-        # Replace white with black...
-        white_areas = (red >= 225) & (blue >= 225) & (green >= 225)    
-        data[white_areas.T] = (0, 0, 0) # Transpose back needed
+    @staticmethod
+    def standardize_background(source: Path, target: Path):
+        for img in source.iterdir():
+            im = Image.open(img)
 
-        im_conv = Image.fromarray(data)
-        im_conv.save(Path(target, img.name))
+            data = np.array(im)   # "data" is a height x width x 4 numpy array
+            red, green, blue = data.T # Temporarily unpack the bands for readability
+
+            # Replace white with black...
+            white_areas = (red >= 225) & (blue >= 225) & (green >= 225)    
+            data[white_areas.T] = (0, 0, 0) # Transpose back needed
+
+            im_conv = Image.fromarray(data)
+            im_conv.save(Path(target, img.name))
