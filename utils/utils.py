@@ -69,8 +69,6 @@ class ImgToolbox():
             raise ValueError('%s does not exist on filesystem' % source)
         
         target_path = Path(target)
-        if not target_path.exists():
-            raise ValueError('%s does not exist on filesystem' % target)
 
         if not isinstance(target_size, tuple):
             raise TypeError('parameter "target_size" must be a tuple')
@@ -96,8 +94,6 @@ class ImgToolbox():
             raise ValueError('%s does not exist on filesystem' % source)
         
         target_path = Path(target)
-        if not target_path.exists():
-            raise ValueError('%s does not exist on filesystem' % target)
 
         
         for img in source_path.iterdir():
