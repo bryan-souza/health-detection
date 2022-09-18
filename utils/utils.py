@@ -13,6 +13,7 @@ class ImgToolbox():
     HEALTHY_CATEGORIES = [1, 8]
 
     def __init__(self, root_path: str | None = None):
+        # TODO: Docs
         self.ROOT_PATH = Path('..')
         if (root_path) is not None:
             self.ROOT_PATH = Path(root_path)
@@ -21,6 +22,7 @@ class ImgToolbox():
         self.EXTRAS_PATH = Path(self.ROOT_PATH, 'extra')
 
     def create_dataset_structure(self):
+        # TODO: Docs
         instances_path = Path(self.EXTRAS_PATH, 'instances_default.json')
         if not instances_path.exists():
             raise FileNotFoundError('"extra/instances_default.json" could not be found')
@@ -60,6 +62,7 @@ class ImgToolbox():
 
     @staticmethod
     def resize_image(source: str, target: str, target_size=Tuple[int, int]):
+        # TODO: Docs
         # Type enforcing
         source_path = Path(source)
         if not source_path.exists():
@@ -86,6 +89,7 @@ class ImgToolbox():
 
     @staticmethod
     def standardize_background(source: str, target: str):
+        # TODO: Docs
         # Type enforcing
         source_path = Path(source)
         if not source_path.exists():
