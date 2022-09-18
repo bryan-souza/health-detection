@@ -14,7 +14,7 @@ class ImgToolbox():
 
     def __init__(self, root_path: str | None = None):
         # TODO: Docs
-        self.ROOT_PATH = Path('..')
+        self.ROOT_PATH = Path('.')
         if (root_path) is not None:
             self.ROOT_PATH = Path(root_path)
 
