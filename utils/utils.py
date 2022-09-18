@@ -53,11 +53,22 @@ class ImgToolbox():
                     shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'healthy', image_name))
                     continue
 
-                shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'unhealthy', image_name))
+                shutil.copyfile(src=image_path, dst=Path(self.DATASET_PATH, 'unhealthy', image_name))    
+
 
     @staticmethod
-    def standardize_background(source: Path, target: Path):
-        for img in source.iterdir():
+    def standardize_background(source: str, target: str):
+        # Type enforcing
+        source_path = Path(source)
+        if not source_path.exists():
+            raise ValueError('%s does not exist on filesystem' % source)
+        
+        target_path = Path(target)
+        if not target_path.exists():
+            raise ValueError('%s does not exist on filesystem' % target)
+
+        
+        for img in source_path.iterdir():
             im = Image.open(img)
 
             data = np.array(im)   # "data" is a height x width x 4 numpy array
@@ -68,4 +79,4 @@ class ImgToolbox():
             data[white_areas.T] = (0, 0, 0) # Transpose back needed
 
             im_conv = Image.fromarray(data)
-            im_conv.save(Path(target, img.name))
+            im_conv.save( Path(target_path, img.name) )
