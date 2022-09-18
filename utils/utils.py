@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 from typing import Tuple
 import numpy as np
@@ -108,3 +109,30 @@ class ImgToolbox():
 
             im_conv = Image.fromarray(data)
             im_conv.save( Path(target_path, img.name) )
+
+    @staticmethod
+    def purge_elements(source: str, target_amount: int):
+        # TODO: Docs
+        # Type enforcing
+        source_path = Path(source)
+        if not source_path.exists():
+            raise ValueError('%s does not exist on filesystem' % source)
+
+        if not isinstance(target_amount, int):
+            raise TypeError('parameter "target_amount" must be an integer')
+
+        if not target_amount > 0:
+            raise ValueError('parameter "target_amount" is %i, should be at least 1' % target_amount)
+        
+
+        # Pick images to be purged (chosen randomly)
+        images = [ img for img in source_path.iterdir() ]
+        purged_images = []
+        while len(purged_images) <= (len(images) - target_amount):
+            choice = random.choice(images)
+            if not choice in purged_images:
+                purged_images.append(choice)
+
+        # Delete images
+        for img in purged_images:
+            os.remove( img )
