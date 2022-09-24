@@ -21,15 +21,20 @@ class ImgToolbox():
 
         self.DATASET_PATH = Path(self.ROOT_PATH, 'dataset')
         self.EXTRAS_PATH = Path(self.ROOT_PATH, 'extra')
+        
+        annotations_path = Path(self.EXTRAS_PATH, 'instances_default.json')
+        if not annotations_path.exists():
+            self.ANNOTATIONS = None
+            print('[WARN] Annotations file could not be found. Some methods will not work')
+            return None
+        
+        self.ANNOTATIONS = COCO(annotations_path)
 
     def create_dataset_structure(self):
         # TODO: Docs
-        instances_path = Path(self.EXTRAS_PATH, 'instances_default.json')
-        if not instances_path.exists():
-            raise FileNotFoundError('"extra/instances_default.json" could not be found')
-
-        # Load annotations
-        dataset = COCO(instances_path)
+        # Check if annotations file were loaded
+        if self.ANNOTATIONS is None:
+            raise RuntimeError('Annotations file not loaded.')
 
         # Create file structure
         class_names = ['healthy', 'unhealthy']
@@ -46,9 +51,9 @@ class ImgToolbox():
                 os.mkdir( CLASS_PATH.absolute() )
 
         # Move files to folders
-        for category_id in dataset.getCatIds():
-            image_ids = dataset.catToImgs[category_id]
-            images = dataset.loadImgs(image_ids)
+        for category_id in self.ANNOTATIONS.getCatIds():
+            image_ids = self.ANNOTATIONS.catToImgs[category_id]
+            images = self.ANNOTATIONS.loadImgs(image_ids)
 
             for image in images:
                 image_path = Path(self.EXTRAS_PATH, image['file_name'])
