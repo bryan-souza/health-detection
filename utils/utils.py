@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import shutil
@@ -8,6 +9,46 @@ from pycocotools.coco import COCO
 from pathlib import Path
 from PIL import Image
 from PIL.Image import Resampling
+
+
+class AnnToolbox():
+    def __init__(self, annotations_path=str):
+        # TODO: Docs
+        # Type enforcing
+        if not isinstance(annotations_path, str):
+            raise TypeError('"annotations_path" must be a string. got %s' % type(annotations_path))
+        
+        ann_path = Path(annotations_path)
+        if not ann_path.exists():
+            raise ValueError('"annotations_path" not found on filesystem')
+
+        _annotations = json.load(open(ann_path, 'r'))
+        for k, v in _annotations.items():
+            # Epic python feature I didn't know about
+            setattr(self, k, v)
+
+    def parse_features(self, feature_names: list | tuple):
+        # TODO: Docs
+        # Type enforcing
+        if not isinstance(feature_names, (list, tuple)):
+            raise TypeError('"feature_names" must be an iterable. got %s' % type(feature_names))
+        
+        if not len(feature_names) > 0:
+            raise ValueError('"feature_names" must have at least one item')
+
+        if not all([ isinstance(item, str) for item in feature_names ]):
+            raise TypeError('"feature_names" must have only strings')
+
+        for ann in self.annotations:
+            out = ()
+            for key in feature_names:
+                try:
+                    out = (*out, ann[key])
+                except KeyError:
+                    raise KeyError("%s is not a valid feature name" % key)
+            
+            yield out
+                    
 
 
 class ImgToolbox():
