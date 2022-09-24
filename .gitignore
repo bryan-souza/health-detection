@@ -1,4 +1,8 @@
+# Folders
 env/
 extra/
 **/**/__pycache__/
+
+# Files
 **/**/*.zip
+**/**/*.*.swp.*
